@@ -1,5 +1,4 @@
 name: Build iOS (unsigned) and upload IPA
-
 on:
   push:
     branches: [ main ]
@@ -8,7 +7,6 @@ on:
 jobs:
   build_ios_unsigned:
     runs-on: macos-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,7 +14,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: 'stable'
+          # මෙතන version එක ඉවත් කර 'channel' එකට පමණක් අවධානය දෙන්න ඉඩ ඇරියා
+          # එවිට එය තියෙන අලුත්ම stable version එක තෝරා ගනීවි
 
       - name: Install dependencies
         run: flutter pub get
