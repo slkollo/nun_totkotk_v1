@@ -15,7 +15,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # මෙතන 'flutter-version' ඉවත් කළා, එතකොට GitHub අලුත්ම stable එක ගනීවි
 
       - name: Install dependencies
         run: flutter pub get
