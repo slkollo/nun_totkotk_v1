@@ -4,112 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'dart:io';
 
 // කැමරා ලිස්ට් එක ගන්න Global Variable එකක්
 List<CameraDescription> cameras = [];
-
-// =====================================================================
-// OVERLAY ENTRY POINT (වෙනත් ඇප් උඩින් පෙනෙන කොටස)
-// =====================================================================
-@pragma("vm:entry-point")
-void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: TrueOverlayScreen(),
-    ),
-  );
-}
-
-class TrueOverlayScreen extends StatefulWidget {
-  const TrueOverlayScreen({super.key});
-
-  @override
-  State<TrueOverlayScreen> createState() => _TrueOverlayScreenState();
-}
-
-class _TrueOverlayScreenState extends State<TrueOverlayScreen> {
-  String _kidName = 'Kid';
-  String _appLanguage = 'en';
-
-  final Map<String, Map<String, String>> _t = {
-    'en': {'waitSec': 'Wait a second', 'tooClose': 'Too close to eyes!', 'moveAway': 'Please move the phone further away.'},
-    'ko': {'waitSec': '잠깐만', 'tooClose': '눈에 너무 가까워요!', 'moveAway': '휴대폰을 더 멀리 떨어뜨려 주세요.'},
-    'zh': {'waitSec': '等一下', 'tooClose': '离眼睛太近了！', 'moveAway': '请把手机移远一点。'},
-    'ja': {'waitSec': 'ちょっと待って', 'tooClose': '目に近すぎます！', 'moveAway': '電話をもう少し離してください。'},
-    'fr': {'waitSec': 'Attends une seconde', 'tooClose': 'Trop près des yeux !', 'moveAway': 'Éloignez le téléphone s\'il te plaît.'},
-    'de': {'waitSec': 'Warte eine Sekunde', 'tooClose': 'Zu nah an den Augen!', 'moveAway': 'Bitte halte das Telefon weiter weg.'},
-    'es': {'waitSec': 'Espera un segundo', 'tooClose': '¡Demasiado cerca de los ojos!', 'moveAway': 'Por favor, aleja más el teléfono.'},
-    'pt': {'waitSec': 'Espere um segundo', 'tooClose': 'Muito perto dos olhos!', 'moveAway': 'Por favor, afaste mais o telefone.'},
-    'ru': {'waitSec': 'Подожди секунду', 'tooClose': 'Слишком близко к глазам!', 'moveAway': 'Пожалуйста, отодвиньте телефон дальше.'},
-    'ar': {'waitSec': 'انتظر ثانية', 'tooClose': 'قريب جداً من العينين!', 'moveAway': 'يرجى إبعاد الهاتف أكثر.'},
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      if (!mounted) return;
-      setState(() {
-        _kidName = prefs.getString('kid_name') ?? 'Kid';
-        _appLanguage = prefs.getString('app_language') ?? 'en';
-      });
-    } catch (e) {
-      debugPrint("Overlay load data error: $e");
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = _t[_appLanguage] ?? _t['en']!;
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        width: double.infinity, height: double.infinity,
-        color: Colors.white.withOpacity(0.95),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                  "${t['waitSec']} $_kidName!",
-                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.redAccent, decoration: TextDecoration.none),
-                  textAlign: TextAlign.center
-              ),
-              const SizedBox(height: 30),
-              Image.asset('assets/eye_warning.gif', width: 160, height: 160),
-              const SizedBox(height: 30),
-              Text(
-                  t['tooClose']!,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, decoration: TextDecoration.none),
-                  textAlign: TextAlign.center
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                      t['moveAway']!,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black54, decoration: TextDecoration.none),
-                      textAlign: TextAlign.center
-                  )
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -241,8 +141,6 @@ class PermissionScreen extends StatelessWidget {
                       const SizedBox(height: 25),
                       _buildPermissionItem(icon: Icons.mic_none_outlined, title: "Record audio", description: "Used for app specific voice features."),
                       const SizedBox(height: 25),
-                      _buildPermissionItem(icon: Icons.layers_outlined, title: "Appear on top", description: "Used to show a warning screen when too close to the device."),
-                      const SizedBox(height: 25),
                       _buildPermissionItem(icon: Icons.notifications_none_outlined, title: "Allow send to notification", description: "Used to send eye health alerts and daily summaries."),
                     ],
                   ),
@@ -261,9 +159,7 @@ class PermissionScreen extends StatelessWidget {
                   child: InkWell(
                     onTap: () async {
                       await [Permission.camera, Permission.microphone, Permission.notification].request();
-                      if (!await Permission.systemAlertWindow.isGranted) {
-                        await Permission.systemAlertWindow.request();
-                      }
+
                       if (context.mounted) {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const InitialSetupScreen()));
                       }
@@ -510,10 +406,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
   double _smoothedRatio = 0.0;
   int _lastFaceDetectedTime = 0;
 
+  // 💡 State එක හරහා විතරක් Warning එක පාලනය කිරීම
   bool _isWarningActive = false;
-
-  // 🔴 ලොකුම වෙනස: Overlay එක පාලනය කරන්න හැදුව ආරක්ෂිත අගුල (Safe Lock)
-  bool _isOverlayWorking = false;
 
   final Map<String, Map<String, String>> _t = {
     'en': {'title': 'Safe Distance Settings', 'voiceTitle': 'Voice Notification Settings', 'defVoice': 'Default Voice', 'custVoice': 'Custom Voice', 'record': '● RECORD', 'screenTitle': 'Warning Screen Settings', 'defScreen': 'Default Screen', 'custPhoto': 'Custom Photo', 'pickPhoto': 'PICK PHOTO', 'start': 'START PROTECTION', 'stop': 'STOP PROTECTION', 'hide': 'HIDE APP', 'waitSec': 'Wait a second', 'tooClose': 'Too close to eyes!', 'moveAway': 'Please move the phone further away.'},
@@ -544,31 +438,6 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
     });
   }
 
-  // 🔴 ලොකුම වෙනස: Overlay එක Crash වෙන්නේ නැතුව පාලනය කරන Function එක
-  Future<void> _manageOverlay(bool show) async {
-    if (_isOverlayWorking) return;
-    _isOverlayWorking = true;
-
-    try {
-      bool isActive = await FlutterOverlayWindow.isActive();
-      if (show && !isActive) {
-        bool isGranted = await FlutterOverlayWindow.isPermissionGranted();
-        if (isGranted) {
-          await FlutterOverlayWindow.showOverlay(
-            alignment: OverlayAlignment.center,
-            flag: OverlayFlag.defaultFlag,
-          );
-        }
-      } else if (!show && isActive) {
-        await FlutterOverlayWindow.closeOverlay();
-      }
-    } catch (e) {
-      debugPrint("Overlay error: $e");
-    } finally {
-      _isOverlayWorking = false;
-    }
-  }
-
   Future<void> _toggleProtection() async {
     if (_isProtecting) {
       await _stopProtection();
@@ -580,12 +449,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
   Future<void> _stopProtection() async {
     setState(() {
       _isProtecting = false;
-      _isWarningActive = false;
+      _isWarningActive = false; // State එක මගින් UI එකෙන් Warning එක ඉවත් වීම
     });
-
-    // ආරක්ෂිතව Overlay එක වහනවා
-    _manageOverlay(false);
-
     await _cameraController?.stopImageStream();
     await _cameraController?.dispose();
     _cameraController = null;
@@ -675,22 +540,20 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
         }
       }
 
-      // 💡 THE FLUTTER WAY FIX - කිසිම Race Condition එකක් නැතුව ආරක්ෂිතව Overlay එක කෝල් කිරීම
+      // 💡 THE FLUTTER WAY FIX:
+      // State එක පාවිච්චි කරලා පමණක් UI එක Update කිරීම. (මෙය ඇප් එක ඇතුළේදී Warning Screen එක පෙන්වයි)
       if (shouldWarn && !_isWarningActive) {
         if (mounted) {
           setState(() {
             _isWarningActive = true;
           });
         }
-        _manageOverlay(true);
-
       } else if (!shouldWarn && _isWarningActive) {
         if (mounted) {
           setState(() {
             _isWarningActive = false;
           });
         }
-        _manageOverlay(false);
       }
 
     } catch (e) {
@@ -713,9 +576,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
     if (_isLoading) return const Scaffold(backgroundColor: Color(0xFFF3E5FF), body: Center(child: CircularProgressIndicator()));
     final t = _t[_appLanguage] ?? _t['en']!;
 
+    // 💡 මෙහිදී Stack එකක් භාවිතයෙන් ප්‍රධාන Screen එකයි Warning Screen එකයි මාරුවෙන් මාරුවට පෙන්වයි.
     return Scaffold(
       body: Stack(
         children: [
+          // ප්‍රධාන UI එක
           Directionality(
             textDirection: _appLanguage == 'ar' ? TextDirection.rtl : TextDirection.ltr,
             child: Container(
@@ -862,6 +727,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> with SingleTi
             ),
           ),
 
+          // 💡 _isWarningActive = true නම් පමණක් මෙම කොටස Stack එක මතුපිටින් Render වේ!
           if (_isWarningActive)
             Positioned.fill(
               child: Material(
