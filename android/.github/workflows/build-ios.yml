@@ -11,16 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
+      - name: Install Flutter manually
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
+          echo "$HOME/flutter/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Flutter doctor & Pub get
+        run: |
+          $HOME/flutter/bin/flutter doctor
+          $HOME/flutter/bin/flutter pub get
 
       - name: Build iOS (no code signing)
-        run: flutter build ios --release --no-codesign
+        run: $HOME/flutter/bin/flutter build ios --release --no-codesign
 
       - name: Create IPA
         run: |
