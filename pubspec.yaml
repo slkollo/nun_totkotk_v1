@@ -1,0 +1,65 @@
+name: nun_toktok_v1
+description: "AI-powered eye protection and distance guard app for kids."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.2.2
+  camera: ^0.11.0+1
+  google_mlkit_face_detection: ^0.11.0
+  # මෙන්න මේකයි අපි වෙනස් කළේ 👇 (^0.5.0 ට හැදුවා)
+  flutter_overlay_window: ^0.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
+    - assets/alon.png
+    - assets/ar.png
+    - assets/de.png
+    - assets/en.png
+    - assets/es.png
+    - assets/fr.png
+    - assets/ja.png
+    - assets/ko.png
+    - assets/pt.png
+    - assets/ru.png
+    - assets/zh.png
+    - assets/bg_main_purple.png
+    - assets/step_image_1.png
+    - assets/step_image_2.png
+    - assets/step_image_3.png
+    - assets/step_image_4.png
+    - assets/ic_floating_eye.png
+    - assets/ic_floating_location.png
+    - assets/ic_floating_shield.png
+    - assets/ic_settings.png
+    - assets/ic_voice_child.png
+    - assets/ic_mic_purple.png
+    - assets/ic_warning_default.png
+    - assets/ic_gallery_icon.png
+    - assets/ic_lock_reset.png
+    - assets/ic_uninstall.png
+    - assets/ic_world.png
+    - assets/ic_3d_lock.png
+    - assets/ic_3d_shield.png
+    - assets/eye_warning.gif
